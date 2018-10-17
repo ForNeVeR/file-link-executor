@@ -1,10 +1,14 @@
 package me.fornever.commandlink
 
 import com.intellij.execution.configurations.GeneralCommandLine
-import com.intellij.execution.filters.*
+import com.intellij.execution.filters.ConsoleFilterProvider
+import com.intellij.execution.filters.Filter
+import com.intellij.execution.filters.HyperlinkInfo
+import com.intellij.execution.filters.TextConsoleBuilderFactory
 import com.intellij.execution.process.ProcessHandlerFactory
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.wm.ToolWindowId
+import com.intellij.openapi.wm.ToolWindow
+import com.intellij.openapi.wm.ToolWindowAnchor
 import com.intellij.openapi.wm.ToolWindowManager
 import com.intellij.util.PathUtil
 import com.intellij.util.io.URLUtil
@@ -12,22 +16,31 @@ import java.io.File
 import java.net.URL
 import java.util.*
 
-class CommandLinkProvider: ConsoleFilterProvider {
+class CommandLinkProvider : ConsoleFilterProvider {
+
+    private var toolWindow: ToolWindow? = null
+    private fun initToolWindow(project: Project): ToolWindow {
+        if (toolWindow == null) {
+            toolWindow = ToolWindowManager.getInstance(project).registerToolWindow("Commands", true, ToolWindowAnchor.BOTTOM)
+        }
+
+        return toolWindow!!
+    }
 
     override fun getDefaultFilters(project: Project): Array<Filter> {
         return arrayOf(CommandLinkFilter(project))
     }
 
-    class CommandLinkFilter(private val project: Project) : Filter {
+    inner class CommandLinkFilter(private val project: Project) : Filter {
 
         private fun runProgram(project: Project, program: File) {
             val cmd = GeneralCommandLine(PathUtil.toSystemIndependentName(program.absolutePath))
             val processHandlerFactory = ProcessHandlerFactory.getInstance()
             val processHandler = processHandlerFactory.createProcessHandler(cmd)
 
-            val toolWindow = ToolWindowManager.getInstance(project).getToolWindow(ToolWindowId.RUN)
+            val toolWindow = initToolWindow(project)
             val consoleView = TextConsoleBuilderFactory.getInstance().createBuilder(project).console
-            val content = toolWindow.contentManager.factory.createContent(consoleView.component, "URL Command", true)
+            val content = toolWindow.contentManager.factory.createContent(consoleView.component, program.name, true)
             toolWindow.contentManager.addContent(content)
 
             processHandler.startNotify()
