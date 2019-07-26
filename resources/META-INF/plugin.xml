@@ -1,7 +1,7 @@
 <idea-plugin>
   <id>me.fornever.commandlink</id>
   <name>IntelliJ Command Link</name>
-  <version>0.0.1</version>
+  <version>0.0.2</version>
   <vendor email="friedrich@fornever.me" url="https://fornever.me">Friedrich von Never</vendor>
 
   <description><![CDATA[
@@ -9,16 +9,12 @@
     ]]></description>
 
   <change-notes><![CDATA[
-      Initial alpha release.
+      Fix IDEA compatibility.
     ]]>
   </change-notes>
 
   <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/build_number_ranges.html for description -->
   <idea-version since-build="173.0"/>
-
-  <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
-       on how to target different products -->
-  <depends>com.intellij.modules.rider</depends>
 
   <extensions defaultExtensionNs="com.intellij">
     <consoleFilterProvider implementation="me.fornever.commandlink.CommandLinkProvider" order="first" />
