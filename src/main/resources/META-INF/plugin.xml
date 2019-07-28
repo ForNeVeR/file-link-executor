@@ -8,6 +8,7 @@
     ]]></description>
 
     <idea-version since-build="191.0"/>
+    <depends>com.intellij.modules.platform</depends>
 
     <extensions defaultExtensionNs="com.intellij">
         <consoleFilterProvider implementation="me.fornever.commandlink.CommandLinkProvider" order="first" />
