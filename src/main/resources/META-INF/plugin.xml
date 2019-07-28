@@ -1,17 +1,11 @@
 <idea-plugin>
     <id>me.fornever.commandlink</id>
     <name>IntelliJ Command Link</name>
-    <version>0.0.2</version>
     <vendor email="friedrich@fornever.me" url="https://fornever.me">Friedrich von Never</vendor>
 
     <description><![CDATA[
       This plugin adds an ability to execute scripts from links in the console output.
     ]]></description>
-
-    <change-notes><![CDATA[
-      Fix IDEA compatibility.
-    ]]>
-    </change-notes>
 
     <idea-version since-build="191.0"/>
 

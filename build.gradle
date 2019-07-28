@@ -4,7 +4,7 @@ plugins {
 }
 
 group 'me.fornever'
-version '0.0.2'
+version '0.0.3'
 
 repositories {
     mavenCentral()
@@ -25,5 +25,6 @@ compileTestKotlin {
 }
 patchPluginXml {
     changeNotes """
-      Fix IDEA compatibility."""
+      Do not try to run non-executable files. 
+      """
 }
