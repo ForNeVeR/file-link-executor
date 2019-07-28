@@ -1,8 +1,5 @@
-# Datasource local storage ignored files
-dataSources.local.xml
-.idea/dataSources
+/.gradle/
+/.idea/workspace.xml
+/.idea/gradle.xml
 
-# Default ignored files
-.idea/workspace.xml
-.idea/shelf
-out
+/build/
