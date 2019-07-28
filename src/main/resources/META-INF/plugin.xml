@@ -7,7 +7,6 @@
       This plugin adds an ability to execute scripts from links in the console output.
     ]]></description>
 
-    <idea-version since-build="191.0"/>
     <depends>com.intellij.modules.platform</depends>
 
     <extensions defaultExtensionNs="com.intellij">

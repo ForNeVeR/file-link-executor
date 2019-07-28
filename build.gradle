@@ -4,7 +4,7 @@ plugins {
 }
 
 group 'me.fornever'
-version '0.0.4'
+version '0.0.5'
 
 repositories {
     mavenCentral()
@@ -17,6 +17,10 @@ dependencies {
 intellij {
     version '2019.1'
 }
+patchPluginXml {
+    sinceBuild '191.0'
+    untilBuild null
+}
 compileKotlin {
     kotlinOptions.jvmTarget = "1.8"
 }
@@ -25,6 +29,6 @@ compileTestKotlin {
 }
 patchPluginXml {
     changeNotes """
-      Fix loading for non-IDEA products.
+      Fix compatible version ranges to install plugin to preview products.
       """
 }
