@@ -1,6 +1,6 @@
 <idea-plugin>
     <id>me.fornever.commandlink</id>
-    <name>IntelliJ Command Link</name>
+    <name>File Link Executor</name>
     <vendor email="friedrich@fornever.me" url="https://fornever.me">Friedrich von Never</vendor>
 
     <description><![CDATA[

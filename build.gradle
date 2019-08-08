@@ -4,7 +4,7 @@ plugins {
 }
 
 group 'me.fornever'
-version '0.0.5'
+version '0.0.6'
 
 repositories {
     mavenCentral()
@@ -29,6 +29,6 @@ compileTestKotlin {
 }
 patchPluginXml {
     changeNotes """
-      Fix compatible version ranges to install plugin to preview products.
+      Updated plugin name according to the guidelines.
       """
 }
