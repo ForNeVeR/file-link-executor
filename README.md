@@ -8,4 +8,4 @@ This plugin will search through console output  (including test output) for
 
 The program output will be shown in a separate tool window.
 
-[plugin-repository]: https://plugins.jetbrains.com/plugin/12787-intellij-command-link
+[plugin-repository]: https://plugins.jetbrains.com/plugin/12787-file-link-executor
