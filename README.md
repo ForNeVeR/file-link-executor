@@ -1,5 +1,5 @@
-intellij-command-link-plugin
-============================
+File Link Executor
+==================
 
 [Plugin repository][plugin-repository]
 
