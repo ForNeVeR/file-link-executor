@@ -15,10 +15,10 @@ dependencies {
 }
 
 intellij {
-    version '2019.1'
+    version '2020.1'
 }
 patchPluginXml {
-    sinceBuild '191.0'
+    sinceBuild '201.0'
     untilBuild null
 }
 compileKotlin {
