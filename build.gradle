@@ -4,7 +4,7 @@ plugins {
 }
 
 group 'me.fornever'
-version '0.0.6'
+version '0.1.0'
 
 repositories {
     mavenCentral()
@@ -29,6 +29,7 @@ compileTestKotlin {
 }
 patchPluginXml {
     changeNotes """
-      Updated plugin name according to the guidelines.
+      Fixed a bug when links stopped working after executing them in another project (not the same where the plugin tool
+      window was created initially).
       """
 }
