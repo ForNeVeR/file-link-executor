@@ -12,28 +12,30 @@ import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.SystemInfo
 import com.intellij.openapi.vfs.LocalFileSystem
+import com.intellij.openapi.wm.RegisterToolWindowTask
 import com.intellij.openapi.wm.ToolWindow
-import com.intellij.openapi.wm.ToolWindowAnchor
 import com.intellij.openapi.wm.ToolWindowManager
 import com.intellij.util.PathUtil
 import com.intellij.util.io.URLUtil
 import java.io.File
 import java.net.URL
 import java.util.*
+import java.util.function.Supplier
 
 class CommandLinkProvider : ConsoleFilterProvider {
 
     companion object {
+        private const val TOOL_WINDOW_ID = "me.fornever.filelinkexecutor.Commands"
         private val logger = Logger.getInstance(CommandLinkProvider::class.java)
     }
 
-    private var toolWindow: ToolWindow? = null
-    private fun initToolWindow(project: Project): ToolWindow {
-        if (toolWindow == null) {
-            toolWindow = ToolWindowManager.getInstance(project).registerToolWindow("Commands", true, ToolWindowAnchor.BOTTOM)
-        }
-
-        return toolWindow!!
+    private fun getToolWindow(project: Project): ToolWindow {
+        val toolWindowManager = ToolWindowManager.getInstance(project)
+        return toolWindowManager.getToolWindow(TOOL_WINDOW_ID)
+            ?: toolWindowManager.registerToolWindow(RegisterToolWindowTask(
+                TOOL_WINDOW_ID,
+                stripeTitle = Supplier { "Commands" }
+            ))
     }
 
     override fun getDefaultFilters(project: Project): Array<Filter> {
@@ -47,7 +49,7 @@ class CommandLinkProvider : ConsoleFilterProvider {
             val processHandlerFactory = ProcessHandlerFactory.getInstance()
             val processHandler = processHandlerFactory.createProcessHandler(cmd)
 
-            val toolWindow = initToolWindow(project)
+            val toolWindow = getToolWindow(project)
             val consoleView = TextConsoleBuilderFactory.getInstance().createBuilder(project).console
             val content = toolWindow.contentManager.factory.createContent(consoleView.component, program.name, true)
             toolWindow.contentManager.addContent(content)
@@ -104,7 +106,7 @@ class CommandLinkProvider : ConsoleFilterProvider {
 
             return when {
                 items != null -> Filter.Result(items)
-                item != null -> Filter.Result(item.getHighlightStartOffset(), item.getHighlightEndOffset(), item.getHyperlinkInfo())
+                item != null -> Filter.Result(item.highlightStartOffset, item.highlightEndOffset, item.getHyperlinkInfo())
                 else -> null
             }
         }
