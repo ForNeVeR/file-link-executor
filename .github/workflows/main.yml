@@ -38,3 +38,6 @@ jobs:
 
       - name: Assemble
         run: ./gradlew assemble
+
+      - name: Stop Gradle daemon
+        run: ./gradlew --stop
