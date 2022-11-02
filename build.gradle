@@ -14,6 +14,11 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
 }
 
+wrapper {
+    gradleVersion = '5.0'
+    distributionType = Wrapper.DistributionType.ALL
+}
+
 intellij {
     version '2020.1'
 }
