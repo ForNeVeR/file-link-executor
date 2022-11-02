@@ -1,11 +1,6 @@
 The Contributor Guide
 =====================
 
-Dependencies
-------------
-
-The plugin build requires JDK 1.8.
-
 Build
 -----
 

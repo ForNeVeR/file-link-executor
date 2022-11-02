@@ -1,6 +1,7 @@
 plugins {
-    id("org.jetbrains.intellij") version "0.4.21"
-    id("org.jetbrains.kotlin.jvm") version "1.3.41"
+    id("me.filippov.gradle.jvm.wrapper") version "0.14.0"
+    id("org.jetbrains.intellij") version "1.9.0"
+    id("org.jetbrains.kotlin.jvm") version "1.7.20"
 }
 
 group = "me.fornever"
@@ -10,8 +11,8 @@ repositories {
     mavenCentral()
 }
 
-dependencies {
-    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
+intellij {
+    version.set("2022.2")
 }
 
 tasks {
@@ -20,21 +21,19 @@ tasks {
         distributionType = Wrapper.DistributionType.ALL
     }
 
-    intellij {
-        version = "2020.1"
+    withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+        kotlinOptions.jvmTarget = "17"
     }
+
+    buildSearchableOptions {
+        enabled = false
+    }
+
     patchPluginXml {
-        sinceBuild("201.0")
-        untilBuild(null)
-    }
-    compileKotlin {
-        kotlinOptions.jvmTarget = "1.8"
-    }
-    compileTestKotlin {
-        kotlinOptions.jvmTarget = "1.8"
-    }
-    patchPluginXml {
-        changeNotes("""
+        sinceBuild.set("222.0")
+        untilBuild.set(null as String?)
+
+        changeNotes.set("""
       Fixed a bug when links stopped working after executing them in another project (not the same where the plugin tool
       window was created initially).
       """)
