@@ -1,41 +1,23 @@
 package me.fornever.commandlink
 
-import com.intellij.execution.configurations.GeneralCommandLine
 import com.intellij.execution.configurations.PathEnvironmentVariableUtil
 import com.intellij.execution.filters.ConsoleFilterProvider
 import com.intellij.execution.filters.Filter
 import com.intellij.execution.filters.HyperlinkInfo
-import com.intellij.execution.filters.TextConsoleBuilderFactory
-import com.intellij.execution.process.ProcessHandlerFactory
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.SystemInfo
 import com.intellij.openapi.vfs.LocalFileSystem
-import com.intellij.openapi.wm.RegisterToolWindowTask
-import com.intellij.openapi.wm.ToolWindow
-import com.intellij.openapi.wm.ToolWindowManager
-import com.intellij.util.PathUtil
 import com.intellij.util.io.URLUtil
 import java.io.File
 import java.net.URL
 import java.util.*
-import java.util.function.Supplier
 
 class CommandLinkProvider : ConsoleFilterProvider {
 
     companion object {
-        private const val TOOL_WINDOW_ID = "me.fornever.filelinkexecutor.Commands"
         private val logger = Logger.getInstance(CommandLinkProvider::class.java)
-    }
-
-    private fun getToolWindow(project: Project): ToolWindow {
-        val toolWindowManager = ToolWindowManager.getInstance(project)
-        return toolWindowManager.getToolWindow(TOOL_WINDOW_ID)
-            ?: toolWindowManager.registerToolWindow(RegisterToolWindowTask(
-                TOOL_WINDOW_ID,
-                stripeTitle = Supplier { "Commands" }
-            ))
     }
 
     override fun getDefaultFilters(project: Project): Array<Filter> {
@@ -44,23 +26,9 @@ class CommandLinkProvider : ConsoleFilterProvider {
 
     inner class CommandLinkFilter(private val project: Project) : Filter {
 
-        private fun runProgram(project: Project, program: File) {
-            val cmd = GeneralCommandLine(PathUtil.toSystemIndependentName(program.absolutePath))
-            val processHandlerFactory = ProcessHandlerFactory.getInstance()
-            val processHandler = processHandlerFactory.createProcessHandler(cmd)
-
-            val toolWindow = getToolWindow(project)
-            val consoleView = TextConsoleBuilderFactory.getInstance().createBuilder(project).console
-            val content = toolWindow.contentManager.factory.createContent(consoleView.component, program.name, true)
-            toolWindow.contentManager.addContent(content)
-
-            processHandler.startNotify()
-            consoleView.attachToProcess(processHandler)
-        }
-
         private fun isExecutable(file: File) = if (SystemInfo.isWindows) {
             val pathExtensions = PathEnvironmentVariableUtil.getWindowsExecutableFileExtensions()
-            val extensionWithDot = "." + file.extension.toLowerCase(Locale.ROOT)
+            val extensionWithDot = "." + file.extension.lowercase()
             pathExtensions.contains(extensionWithDot)
         } else {
             file.canExecute()
@@ -71,7 +39,7 @@ class CommandLinkProvider : ConsoleFilterProvider {
             logger.info("Link to file \"$file\" was clicked")
             if (isExecutable(file)) {
                 logger.info("File \"$file\" is executable, executing")
-                runProgram(project, file)
+                ProcessUtils.runProgram(project, file)
             } else {
                 logger.info("File \"$file\" is not executable, opening")
                 val virtualFile = LocalFileSystem.getInstance().findFileByIoFile(file)
