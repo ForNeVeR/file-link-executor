@@ -1,4 +1,4 @@
-package me.fornever.commandlink
+package me.fornever.filelinkexecutor
 
 import com.intellij.execution.configurations.PathEnvironmentVariableUtil
 import com.intellij.execution.filters.ConsoleFilterProvider
@@ -39,7 +39,7 @@ class CommandLinkProvider : ConsoleFilterProvider {
             logger.info("Link to file \"$file\" was clicked")
             if (isExecutable(file)) {
                 logger.info("File \"$file\" is executable, executing")
-                ProcessUtils.runProgram(project, file)
+                CommandExecutor.getInstance(project).runProgram(file)
             } else {
                 logger.info("File \"$file\" is not executable, opening")
                 val virtualFile = LocalFileSystem.getInstance().findFileByIoFile(file)

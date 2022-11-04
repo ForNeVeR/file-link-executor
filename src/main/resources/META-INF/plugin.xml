@@ -10,11 +10,6 @@
     <depends>com.intellij.modules.platform</depends>
 
     <extensions defaultExtensionNs="com.intellij">
-        <consoleFilterProvider implementation="me.fornever.commandlink.CommandLinkProvider" order="first" />
+        <consoleFilterProvider implementation="me.fornever.filelinkexecutor.CommandLinkProvider" order="first" />
     </extensions>
-
-    <actions>
-        <!-- Add your actions here -->
-    </actions>
-
 </idea-plugin>
