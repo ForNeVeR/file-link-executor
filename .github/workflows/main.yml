@@ -12,6 +12,7 @@ on:
 jobs:
   main:
     runs-on: ${{ matrix.config.image }}
+    name: ${{ matrix.config.image }}
     strategy:
       matrix:
         config:
