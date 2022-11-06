@@ -6,8 +6,13 @@ import com.intellij.execution.process.ProcessAdapter
 import com.intellij.execution.process.ProcessEvent
 import com.intellij.execution.process.ProcessHandler
 import com.intellij.execution.process.ProcessHandlerFactory
+import com.intellij.execution.ui.ConsoleView
+import com.intellij.execution.ui.ConsoleViewContentType
+import com.intellij.openapi.Disposable
+import com.intellij.openapi.application.EDT
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
+import com.intellij.openapi.progress.withBackgroundProgressIndicator
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.MessageType
 import com.intellij.openapi.wm.RegisterToolWindowTask
@@ -16,7 +21,10 @@ import com.intellij.openapi.wm.ToolWindowBalloonShowOptions
 import com.intellij.openapi.wm.ToolWindowManager
 import com.intellij.util.PathUtil
 import com.intellij.util.application
+import kotlinx.coroutines.*
 import java.io.File
+
+private const val TOOL_WINDOW_ID = "me.fornever.filelinkexecutor.Commands"
 
 @Service(Service.Level.PROJECT)
 class CommandExecutor(
@@ -24,7 +32,7 @@ class CommandExecutor(
     private val processHandlerFactory: Lazy<ProcessHandlerFactory>,
     private val toolWindowManager: Lazy<ToolWindowManager>,
     private val textConsoleBuilderFactory: Lazy<TextConsoleBuilderFactory>
-) {
+) : Disposable {
 
     @Suppress("unused")
     constructor(project: Project) : this(
@@ -36,19 +44,25 @@ class CommandExecutor(
 
     companion object {
         fun getInstance(project: Project): CommandExecutor = project.service()
+    }
 
-        private const val TOOL_WINDOW_ID = "me.fornever.filelinkexecutor.Commands"
+    private val scope = CoroutineScope(Dispatchers.EDT)
+    override fun dispose() {
+        scope.cancel()
     }
 
     fun runProgram(program: File) {
         val cmd = GeneralCommandLine(PathUtil.toSystemIndependentName(program.absolutePath))
+        val programName = program.name
+
+        val consoleView = textConsoleBuilderFactory.value.createBuilder(project).console
         val processHandler = processHandlerFactory.value.createProcessHandler(cmd).apply {
-            attachExecutionListener(this, program.name)
+            val listener = attachExecutionListener(this, program.name, consoleView)
+            startProgressIndicator(listener, programName)
         }
 
         val toolWindow = getToolWindow()
-        val consoleView = textConsoleBuilderFactory.value.createBuilder(project).console
-        val content = toolWindow.contentManager.factory.createContent(consoleView.component, program.name, true)
+        val content = toolWindow.contentManager.factory.createContent(consoleView.component, programName, true)
         toolWindow.contentManager.addContent(content)
 
         consoleView.attachToProcess(processHandler)
@@ -63,22 +77,56 @@ class CommandExecutor(
             ))
     }
 
-    private fun attachExecutionListener(processHandler: ProcessHandler, name: String) {
-        processHandler.addProcessListener(object : ProcessAdapter() {
-            override fun processTerminated(event: ProcessEvent) {
-                val success = event.exitCode == 0
-                val balloon = ToolWindowBalloonShowOptions(
-                    TOOL_WINDOW_ID,
-                    if (success) MessageType.INFO else MessageType.ERROR,
-                    if (success)
-                        FileLinkExecutorBundle.message("execution.success", name)
-                    else
-                        FileLinkExecutorBundle.message("execution.failed", name)
-                )
-                application.invokeLater {
-                    toolWindowManager.value.notifyByBalloon(balloon)
-                }
+    private fun attachExecutionListener(processHandler: ProcessHandler, programName: String, console: ConsoleView) =
+        ExecutionListener(toolWindowManager, programName, console).apply {
+            processHandler.addProcessListener(this)
+        }
+
+    private fun startProgressIndicator(listener: ExecutionListener, programName: String) {
+        scope.launch {
+            @Suppress("UnstableApiUsage")
+            withBackgroundProgressIndicator(
+                project,
+                FileLinkExecutorBundle.message("execution.running", programName)
+            ) {
+                listener.termination.await()
             }
-        })
+        }
+    }
+}
+
+private class ExecutionListener(
+    private val toolWindowManager: Lazy<ToolWindowManager>,
+    private val programName: String,
+    private val console: ConsoleView
+) : ProcessAdapter() {
+
+    private val _termination = CompletableDeferred<Unit>()
+    val termination: Deferred<Unit>
+        get() = _termination
+
+    override fun processTerminated(event: ProcessEvent) {
+        _termination.complete(Unit)
+        notifyCompletion(event)
+    }
+
+    private fun notifyCompletion(event: ProcessEvent) {
+        val success = event.exitCode == 0
+
+        val balloon = ToolWindowBalloonShowOptions(
+            TOOL_WINDOW_ID,
+            if (success) MessageType.INFO else MessageType.ERROR,
+            if (success)
+                FileLinkExecutorBundle.message("execution.success", programName)
+            else
+                FileLinkExecutorBundle.message("execution.failed", programName)
+        )
+        application.invokeLater {
+            console.print(
+                FileLinkExecutorBundle.message("execution.terminatedWithCode", event.exitCode),
+                ConsoleViewContentType.SYSTEM_OUTPUT
+            )
+            toolWindowManager.value.notifyByBalloon(balloon)
+        }
     }
 }
