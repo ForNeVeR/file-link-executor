@@ -21,6 +21,10 @@ tasks {
         distributionType = Wrapper.DistributionType.ALL
     }
 
+    withType<JavaCompile> {
+        java.targetCompatibility = JavaVersion.VERSION_17
+    }
+
     withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
         kotlinOptions.jvmTarget = "17"
     }
