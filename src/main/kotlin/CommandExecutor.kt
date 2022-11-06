@@ -55,7 +55,11 @@ class CommandExecutor(
             startProgressIndicator(listener, programName)
         }
 
-        executionToolWindowManager.value.addTab(consoleView.component, programName)
+        executionToolWindowManager.value.addTab(
+            processHandler,
+            consoleView,
+            programName
+        )
 
         consoleView.attachToProcess(processHandler)
         processHandler.startNotify()
