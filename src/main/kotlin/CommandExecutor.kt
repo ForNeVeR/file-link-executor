@@ -15,22 +15,16 @@ import com.intellij.openapi.components.service
 import com.intellij.openapi.progress.withBackgroundProgressIndicator
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.MessageType
-import com.intellij.openapi.wm.RegisterToolWindowTask
-import com.intellij.openapi.wm.ToolWindow
-import com.intellij.openapi.wm.ToolWindowBalloonShowOptions
-import com.intellij.openapi.wm.ToolWindowManager
 import com.intellij.util.PathUtil
 import com.intellij.util.application
 import kotlinx.coroutines.*
 import java.io.File
 
-private const val TOOL_WINDOW_ID = "me.fornever.filelinkexecutor.Commands"
-
 @Service(Service.Level.PROJECT)
 class CommandExecutor(
     private val project: Project,
     private val processHandlerFactory: Lazy<ProcessHandlerFactory>,
-    private val toolWindowManager: Lazy<ToolWindowManager>,
+    private val executionToolWindowManager: Lazy<ExecutionToolWindowManager>,
     private val textConsoleBuilderFactory: Lazy<TextConsoleBuilderFactory>
 ) : Disposable {
 
@@ -38,7 +32,7 @@ class CommandExecutor(
     constructor(project: Project) : this(
         project,
         lazy { ProcessHandlerFactory.getInstance() },
-        lazy { ToolWindowManager.getInstance(project) },
+        lazy { ExecutionToolWindowManager.getInstance(project) },
         lazy { TextConsoleBuilderFactory.getInstance() }
     )
 
@@ -61,24 +55,14 @@ class CommandExecutor(
             startProgressIndicator(listener, programName)
         }
 
-        val toolWindow = getToolWindow()
-        val content = toolWindow.contentManager.factory.createContent(consoleView.component, programName, true)
-        toolWindow.contentManager.addContent(content)
+        executionToolWindowManager.value.addTab(consoleView.component, programName)
 
         consoleView.attachToProcess(processHandler)
         processHandler.startNotify()
     }
 
-    private fun getToolWindow(): ToolWindow {
-        return toolWindowManager.value.getToolWindow(TOOL_WINDOW_ID)
-            ?: toolWindowManager.value.registerToolWindow(RegisterToolWindowTask(
-                TOOL_WINDOW_ID,
-                stripeTitle = { "Commands" }
-            ))
-    }
-
     private fun attachExecutionListener(processHandler: ProcessHandler, programName: String, console: ConsoleView) =
-        ExecutionListener(toolWindowManager, programName, console).apply {
+        ExecutionListener(executionToolWindowManager, programName, console).apply {
             processHandler.addProcessListener(this)
         }
 
@@ -96,7 +80,7 @@ class CommandExecutor(
 }
 
 private class ExecutionListener(
-    private val toolWindowManager: Lazy<ToolWindowManager>,
+    private val executionToolWindowManager: Lazy<ExecutionToolWindowManager>,
     private val programName: String,
     private val console: ConsoleView
 ) : ProcessAdapter() {
@@ -112,21 +96,18 @@ private class ExecutionListener(
 
     private fun notifyCompletion(event: ProcessEvent) {
         val success = event.exitCode == 0
-
-        val balloon = ToolWindowBalloonShowOptions(
-            TOOL_WINDOW_ID,
-            if (success) MessageType.INFO else MessageType.ERROR,
-            if (success)
-                FileLinkExecutorBundle.message("execution.success", programName)
-            else
-                FileLinkExecutorBundle.message("execution.failed", programName)
-        )
         application.invokeLater {
             console.print(
                 FileLinkExecutorBundle.message("execution.terminatedWithCode", event.exitCode),
                 ConsoleViewContentType.SYSTEM_OUTPUT
             )
-            toolWindowManager.value.notifyByBalloon(balloon)
+            executionToolWindowManager.value.notifyByBalloon(
+                if (success) MessageType.INFO else MessageType.ERROR,
+                if (success)
+                    FileLinkExecutorBundle.message("execution.success", programName)
+                else
+                    FileLinkExecutorBundle.message("execution.failed", programName)
+            )
         }
     }
 }
