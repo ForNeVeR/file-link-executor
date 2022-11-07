@@ -8,10 +8,8 @@ import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.editor.colors.CodeInsightColors
 import com.intellij.openapi.editor.colors.EditorColorsManager
 import com.intellij.openapi.editor.markup.TextAttributes
-import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.SystemInfo
-import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.terminal.JBTerminalSystemSettingsProviderBase
 import com.intellij.util.io.URLUtil
 import java.io.File
@@ -30,16 +28,12 @@ class CommandLinkProvider : ConsoleFilterProvider {
 
     inner class CommandLinkFilter(
         private val editorColorsManager: Lazy<EditorColorsManager>,
-        private val commandExecutor: Lazy<CommandExecutor>,
-        private val localFileSystem: Lazy<LocalFileSystem>,
-        private val fileEditorManager: Lazy<FileEditorManager>
+        private val commandExecutor: Lazy<CommandExecutor>
     ) : Filter {
 
         constructor(project: Project) : this(
             lazy { EditorColorsManager.getInstance() },
-            lazy { CommandExecutor.getInstance(project) },
-            lazy { LocalFileSystem.getInstance() },
-            lazy { FileEditorManager.getInstance(project) }
+            lazy { CommandExecutor.getInstance(project) }
         )
 
         private val highlightAttributes: TextAttributes
@@ -61,19 +55,7 @@ class CommandLinkProvider : ConsoleFilterProvider {
         private fun buildHyperlinkInfo(url: String) = HyperlinkInfo {
             val file = URLUtil.urlToFile(URL(url))
             logger.info("Link to file \"$file\" was clicked")
-            if (isExecutable(file)) {
-                logger.info("File \"$file\" is executable, executing")
-                commandExecutor.value.runProgram(file)
-            } else {
-                logger.info("File \"$file\" is not executable, opening")
-                val virtualFile = localFileSystem.value.findFileByIoFile(file)
-                if (virtualFile == null) {
-                    logger.warn("Virtual file is null for \"$file\"")
-                    return@HyperlinkInfo
-                }
-
-                fileEditorManager.value.openFile(virtualFile, true)
-            }
+            commandExecutor.value.runProgram(file)
         }
 
         override fun applyFilter(line: String, entireLength: Int): Filter.Result? {
@@ -84,7 +66,9 @@ class CommandLinkProvider : ConsoleFilterProvider {
             val items = mutableListOf<Filter.ResultItem>()
             val textStartOffset = entireLength - line.length
             while (m.find()) {
-                items.add(createResultItem(textStartOffset, m))
+                val result = createResultItem(textStartOffset, m)
+                if (result != null)
+                    items.add(result)
             }
 
             return when {
@@ -93,14 +77,16 @@ class CommandLinkProvider : ConsoleFilterProvider {
             }
         }
 
-        private fun createResultItem(
-            textStartOffset: Int,
-            m: Matcher
-        ) = Filter.ResultItem(
-            textStartOffset + m.start(),
-            textStartOffset + m.end(),
-            buildHyperlinkInfo(m.group()),
-            highlightAttributes
-        )
+        private fun createResultItem(textStartOffset: Int, m: Matcher): Filter.ResultItem? {
+            val url = m.group()
+            val file = URLUtil.urlToFile(URL(url))
+            if (!isExecutable(file)) return null
+            return Filter.ResultItem(
+                textStartOffset + m.start(),
+                textStartOffset + m.end(),
+                buildHyperlinkInfo(url),
+                highlightAttributes
+            )
+        }
     }
 }
