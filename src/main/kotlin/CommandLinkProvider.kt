@@ -5,14 +5,18 @@ import com.intellij.execution.filters.ConsoleFilterProvider
 import com.intellij.execution.filters.Filter
 import com.intellij.execution.filters.HyperlinkInfo
 import com.intellij.openapi.diagnostic.Logger
+import com.intellij.openapi.editor.colors.CodeInsightColors
+import com.intellij.openapi.editor.colors.EditorColorsManager
+import com.intellij.openapi.editor.markup.TextAttributes
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.SystemInfo
 import com.intellij.openapi.vfs.LocalFileSystem
+import com.intellij.terminal.JBTerminalSystemSettingsProviderBase
 import com.intellij.util.io.URLUtil
 import java.io.File
 import java.net.URL
-import java.util.*
+import java.util.regex.Matcher
 
 class CommandLinkProvider : ConsoleFilterProvider {
 
@@ -24,7 +28,27 @@ class CommandLinkProvider : ConsoleFilterProvider {
         return arrayOf(CommandLinkFilter(project))
     }
 
-    inner class CommandLinkFilter(private val project: Project) : Filter {
+    inner class CommandLinkFilter(
+        private val editorColorsManager: Lazy<EditorColorsManager>,
+        private val commandExecutor: Lazy<CommandExecutor>,
+        private val localFileSystem: Lazy<LocalFileSystem>,
+        private val fileEditorManager: Lazy<FileEditorManager>
+    ) : Filter {
+
+        constructor(project: Project) : this(
+            lazy { EditorColorsManager.getInstance() },
+            lazy { CommandExecutor.getInstance(project) },
+            lazy { LocalFileSystem.getInstance() },
+            lazy { FileEditorManager.getInstance(project) }
+        )
+
+        private val highlightAttributes: TextAttributes
+            get() {
+                val scheme = editorColorsManager.value.globalScheme
+                val commandToRun = scheme.getAttributes(JBTerminalSystemSettingsProviderBase.COMMAND_TO_RUN_USING_IDE_KEY)
+                val link = scheme.getAttributes(CodeInsightColors.HYPERLINK_ATTRIBUTES)
+                return TextAttributes.merge(commandToRun, link)
+            }
 
         private fun isExecutable(file: File) = if (SystemInfo.isWindows) {
             val pathExtensions = PathEnvironmentVariableUtil.getWindowsExecutableFileExtensions()
@@ -39,16 +63,16 @@ class CommandLinkProvider : ConsoleFilterProvider {
             logger.info("Link to file \"$file\" was clicked")
             if (isExecutable(file)) {
                 logger.info("File \"$file\" is executable, executing")
-                CommandExecutor.getInstance(project).runProgram(file)
+                commandExecutor.value.runProgram(file)
             } else {
                 logger.info("File \"$file\" is not executable, opening")
-                val virtualFile = LocalFileSystem.getInstance().findFileByIoFile(file)
+                val virtualFile = localFileSystem.value.findFileByIoFile(file)
                 if (virtualFile == null) {
                     logger.warn("Virtual file is null for \"$file\"")
                     return@HyperlinkInfo
                 }
 
-                FileEditorManager.getInstance(project).openFile(virtualFile, true)
+                fileEditorManager.value.openFile(virtualFile, true)
             }
         }
 
@@ -57,26 +81,26 @@ class CommandLinkProvider : ConsoleFilterProvider {
 
             val pattern = URLUtil.FILE_URL_PATTERN
             val m = pattern.matcher(line)
-            var item: Filter.ResultItem? = null
-            var items: MutableList<Filter.ResultItem>? = null
+            val items = mutableListOf<Filter.ResultItem>()
             val textStartOffset = entireLength - line.length
             while (m.find()) {
-                if (item == null) {
-                    item = Filter.ResultItem(textStartOffset + m.start(), textStartOffset + m.end(), buildHyperlinkInfo(m.group()))
-                } else {
-                    if (items == null) {
-                        items = ArrayList(2)
-                        items.add(item)
-                    }
-                    items.add(Filter.ResultItem(textStartOffset + m.start(), textStartOffset + m.end(), buildHyperlinkInfo(m.group())))
-                }
+                items.add(createResultItem(textStartOffset, m))
             }
 
             return when {
-                items != null -> Filter.Result(items)
-                item != null -> Filter.Result(item.highlightStartOffset, item.highlightEndOffset, item.getHyperlinkInfo())
-                else -> null
+                items.isEmpty() -> null
+                else -> Filter.Result(items)
             }
         }
+
+        private fun createResultItem(
+            textStartOffset: Int,
+            m: Matcher
+        ) = Filter.ResultItem(
+            textStartOffset + m.start(),
+            textStartOffset + m.end(),
+            buildHyperlinkInfo(m.group()),
+            highlightAttributes
+        )
     }
 }
