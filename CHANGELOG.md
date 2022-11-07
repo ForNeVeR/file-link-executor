@@ -9,6 +9,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 - The tabs for started processes were moved to the standard **Run** tool window.
 - The tabs created by the plugin are now automatically reused (so they won't pile up as before).
 - The minimal IntelliJ version required is now 2022.2.
+- Default link highlighting is now combined from hyperlink and "Command to run using IDE".
+- The plugin no longer hijacks links to non-executable files.
 
 ### Added
 - Balloon notifications about script termination states.
