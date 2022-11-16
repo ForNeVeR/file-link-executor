@@ -8,6 +8,7 @@ import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.editor.colors.CodeInsightColors
 import com.intellij.openapi.editor.colors.EditorColorsManager
 import com.intellij.openapi.editor.markup.TextAttributes
+import com.intellij.openapi.project.DumbAware
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.SystemInfo
 import com.intellij.terminal.JBTerminalSystemSettingsProviderBase
@@ -29,7 +30,7 @@ class CommandLinkProvider : ConsoleFilterProvider {
     inner class CommandLinkFilter(
         private val editorColorsManager: Lazy<EditorColorsManager>,
         private val commandExecutor: Lazy<CommandExecutor>
-    ) : Filter {
+    ) : Filter, DumbAware {
 
         constructor(project: Project) : this(
             lazy { EditorColorsManager.getInstance() },

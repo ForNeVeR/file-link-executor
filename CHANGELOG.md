@@ -11,6 +11,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 - The minimal IntelliJ version required is now 2022.2.
 - Default link highlighting is now combined from hyperlink and "Command to run using IDE".
 - The plugin no longer hijacks links to non-executable files.
+- The filter is now available during indexing as well.
 
 ### Added
 - Balloon notifications about script termination states.
