@@ -1,10 +1,13 @@
 File Link Executor [![JetBrains Plugins][badge-plugins]][plugin-repository]
 ==================
 
-This plugin will search through console output  (including test output) for
-`file:///` links, and execute the links when they're clicked.
+This plugin will search through console output (including test output) for `file:///` links, and execute the links when they're clicked.
 
-The program output will be shown in a separate tool window.
+The program output will be shown in the **Run** tool window.
+
+For directory links, it will open the directories in a local file manager.
+
+Works for any IntelliJ-based IDEs, starting from IntelliJ platform 2022.2.
 
 Documentation
 -------------

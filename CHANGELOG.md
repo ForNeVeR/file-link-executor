@@ -14,6 +14,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 - The filter is now available during indexing as well.
 
 ### Added
+- An ability to open directories in file manager.
 - Balloon notifications about script termination states.
 - A progress indicator during script execution.
 

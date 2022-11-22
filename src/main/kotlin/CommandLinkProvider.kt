@@ -4,6 +4,7 @@ import com.intellij.execution.configurations.PathEnvironmentVariableUtil
 import com.intellij.execution.filters.ConsoleFilterProvider
 import com.intellij.execution.filters.Filter
 import com.intellij.execution.filters.HyperlinkInfo
+import com.intellij.ide.actions.RevealFileAction
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.editor.colors.CodeInsightColors
 import com.intellij.openapi.editor.colors.EditorColorsManager
@@ -45,18 +46,26 @@ class CommandLinkProvider : ConsoleFilterProvider {
                 return TextAttributes.merge(commandToRun, link)
             }
 
-        private fun isExecutable(file: File) = if (SystemInfo.isWindows) {
-            val pathExtensions = PathEnvironmentVariableUtil.getWindowsExecutableFileExtensions()
-            val extensionWithDot = "." + file.extension.lowercase()
-            pathExtensions.contains(extensionWithDot)
-        } else {
-            file.canExecute()
+        private fun isOpenable(file: File): Boolean {
+            if (file.isDirectory) return true
+
+            return if (SystemInfo.isWindows) {
+                val pathExtensions = PathEnvironmentVariableUtil.getWindowsExecutableFileExtensions()
+                val extensionWithDot = "." + file.extension.lowercase()
+                pathExtensions.contains(extensionWithDot)
+            } else {
+                file.canExecute()
+            }
         }
 
         private fun buildHyperlinkInfo(url: String) = HyperlinkInfo {
             val file = URLUtil.urlToFile(URL(url))
-            logger.info("Link to file \"$file\" was clicked")
-            commandExecutor.value.runProgram(file)
+            val kind = if (file.isDirectory) "directory" else "file"
+            logger.info("Link to a $kind \"$file\" was clicked")
+            if (file.isDirectory)
+                RevealFileAction.openDirectory(file)
+            else
+                commandExecutor.value.runProgram(file)
         }
 
         override fun applyFilter(line: String, entireLength: Int): Filter.Result? {
@@ -81,7 +90,7 @@ class CommandLinkProvider : ConsoleFilterProvider {
         private fun createResultItem(textStartOffset: Int, m: Matcher): Filter.ResultItem? {
             val url = m.group()
             val file = URLUtil.urlToFile(URL(url))
-            if (!isExecutable(file)) return null
+            if (!isOpenable(file)) return null
             return Filter.ResultItem(
                 textStartOffset + m.start(),
                 textStartOffset + m.end(),
