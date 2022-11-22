@@ -38,8 +38,8 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
 
-      - name: Assemble
-        run: ./gradlew assemble
+      - name: Build
+        run: ./gradlew buildPlugin
 
       - name: Stop Gradle daemon
         run: ./gradlew --stop

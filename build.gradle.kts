@@ -1,6 +1,7 @@
 plugins {
     id("me.filippov.gradle.jvm.wrapper") version "0.14.0"
-    id("org.jetbrains.intellij") version "1.9.0"
+    id("org.jetbrains.changelog") version "2.0.0"
+    id("org.jetbrains.intellij") version "1.10.0"
     id("org.jetbrains.kotlin.jvm") version "1.7.20"
 }
 
@@ -32,14 +33,22 @@ tasks {
     buildSearchableOptions {
         enabled = false
     }
+    jarSearchableOptions {
+        enabled = false
+    }
 
     patchPluginXml {
         sinceBuild.set("222.0")
-        untilBuild.set(null as String?)
+        untilBuild.set(provider { null })
 
-        changeNotes.set("""
-      Fixed a bug when links stopped working after executing them in another project (not the same where the plugin tool
-      window was created initially).
-      """)
+        changeNotes.set(provider {
+            changelog.renderItem(
+                changelog
+                    .getLatest()
+                    .withHeader(false)
+                    .withEmptySections(false),
+                org.jetbrains.changelog.Changelog.OutputType.HTML
+            )
+        })
     }
 }
