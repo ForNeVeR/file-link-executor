@@ -43,6 +43,9 @@ jobs:
       - name: Build
         run: ./gradlew buildPlugin
 
+      - name: Stop Gradle daemon
+        run: ./gradlew --stop
+
       - name: Unpack distribution # for the purpose of uploading
         shell: pwsh
         run: src/scripts/Unpack-Distribution.ps1
