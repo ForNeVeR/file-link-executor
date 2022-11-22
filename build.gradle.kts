@@ -33,9 +33,6 @@ tasks {
     buildSearchableOptions {
         enabled = false
     }
-    jarSearchableOptions {
-        enabled = false
-    }
 
     patchPluginXml {
         sinceBuild.set("222.0")
