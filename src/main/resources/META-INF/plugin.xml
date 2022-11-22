@@ -4,7 +4,9 @@
     <vendor email="friedrich@fornever.me" url="https://fornever.me">Friedrich von Never</vendor>
 
     <description><![CDATA[
-      This plugin adds an ability to execute scripts from links in the console output.
+        <p>This plugin will search through console output (including test output) for `file:///` links, and execute the links when they're clicked.</p>
+        <p>The program output will be shown in the **Run** tool window.</p>
+        <p>For directory links, it will open the directories in a local file manager.</p>
     ]]></description>
 
     <depends>com.intellij.modules.platform</depends>
