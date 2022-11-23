@@ -8,6 +8,7 @@ import com.intellij.execution.process.ProcessHandler
 import com.intellij.execution.process.ProcessHandlerFactory
 import com.intellij.execution.ui.ConsoleView
 import com.intellij.execution.ui.ConsoleViewContentType
+import com.intellij.execution.ui.RunContentDescriptor
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.application.EDT
 import com.intellij.openapi.components.Service
@@ -49,26 +50,35 @@ class CommandExecutor(
         val cmd = GeneralCommandLine(PathUtil.toSystemIndependentName(program.absolutePath))
         val programName = program.name
 
-        val consoleView = textConsoleBuilderFactory.value.createBuilder(project).console
-        val processHandler = processHandlerFactory.value.createProcessHandler(cmd).apply {
-            val listener = attachExecutionListener(this, program.name, consoleView)
-            startProgressIndicator(listener, programName)
-        }
+        val console = textConsoleBuilderFactory.value.createBuilder(project).console
+        val (processHandler, descriptor) = startProcess(cmd, programName, console)
+        val listener = attachExecutionListener(processHandler, programName, console, descriptor)
+        startProgressIndicator(listener, programName)
 
-        executionToolWindowManager.value.addTab(
-            processHandler,
-            consoleView,
-            programName
-        )
-
-        consoleView.attachToProcess(processHandler)
+        console.attachToProcess(processHandler)
         processHandler.startNotify()
     }
 
-    private fun attachExecutionListener(processHandler: ProcessHandler, programName: String, console: ConsoleView) =
-        ExecutionListener(executionToolWindowManager, programName, console).apply {
-            processHandler.addProcessListener(this)
-        }
+    private data class RunResult(val processHandler: ProcessHandler, val contentDescriptor: RunContentDescriptor)
+    private fun startProcess(command: GeneralCommandLine, programName: String, console: ConsoleView): RunResult {
+        val processHandler = processHandlerFactory.value.createProcessHandler(command)
+        val descriptor = executionToolWindowManager.value.addTab(
+            processHandler,
+            console,
+            programName
+        )
+
+        return RunResult(processHandler, descriptor)
+    }
+
+    private fun attachExecutionListener(
+        processHandler: ProcessHandler,
+        programName: String,
+        console: ConsoleView,
+        descriptor: RunContentDescriptor
+    ) = ExecutionListener(executionToolWindowManager, programName, console, descriptor).apply {
+        processHandler.addProcessListener(this)
+    }
 
     private fun startProgressIndicator(listener: ExecutionListener, programName: String) {
         scope.launch {
@@ -86,7 +96,8 @@ class CommandExecutor(
 private class ExecutionListener(
     private val executionToolWindowManager: Lazy<ExecutionToolWindowManager>,
     private val programName: String,
-    private val console: ConsoleView
+    private val console: ConsoleView,
+    private val descriptor: RunContentDescriptor
 ) : ProcessAdapter() {
 
     private val _termination = CompletableDeferred<Unit>()
@@ -106,6 +117,7 @@ private class ExecutionListener(
                 ConsoleViewContentType.SYSTEM_OUTPUT
             )
             executionToolWindowManager.value.notifyByBalloon(
+                descriptor,
                 if (success) MessageType.INFO else MessageType.ERROR,
                 if (success)
                     FileLinkExecutorBundle.message("execution.success", programName)
