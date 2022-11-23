@@ -51,24 +51,17 @@ class CommandExecutor(
         val programName = program.name
 
         val console = textConsoleBuilderFactory.value.createBuilder(project).console
-        val (processHandler, descriptor) = startProcess(cmd, programName, console)
-        val listener = attachExecutionListener(processHandler, programName, console, descriptor)
-        startProgressIndicator(listener, programName)
-
-        console.attachToProcess(processHandler)
-        processHandler.startNotify()
-    }
-
-    private data class RunResult(val processHandler: ProcessHandler, val contentDescriptor: RunContentDescriptor)
-    private fun startProcess(command: GeneralCommandLine, programName: String, console: ConsoleView): RunResult {
-        val processHandler = processHandlerFactory.value.createProcessHandler(command)
+        val processHandler = processHandlerFactory.value.createProcessHandler(cmd)
         val descriptor = executionToolWindowManager.value.addTab(
             processHandler,
             console,
             programName
         )
+        val listener = attachExecutionListener(processHandler, programName, console, descriptor)
+        startProgressIndicator(listener, programName)
 
-        return RunResult(processHandler, descriptor)
+        console.attachToProcess(processHandler)
+        processHandler.startNotify()
     }
 
     private fun attachExecutionListener(
