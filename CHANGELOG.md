@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [Unreleased] (1.0.2)
+## [1.0.2] - 2022-11-29
 ### Fixed
 - The **Run** tool window no longer get auto-activated on command start.
 
@@ -68,4 +68,5 @@ The initial release of the IntelliJ Command Link plugin. It is only compatible w
 [0.1.0]: https://github.com/ForNeVeR/file-link-executor/compare/v0.0.6...v0.1.0
 [1.0.0]: https://github.com/ForNeVeR/file-link-executor/compare/v0.1.0...v1.0.0
 [1.0.1]: https://github.com/ForNeVeR/file-link-executor/compare/v1.0.0...v1.0.1
-[Unreleased]: https://github.com/ForNeVeR/file-link-executor/compare/v1.0.1...HEAD
+[1.0.2]: https://github.com/ForNeVeR/file-link-executor/compare/v1.0.1...v1.0.2
+[Unreleased]: https://github.com/ForNeVeR/file-link-executor/compare/v1.0.2...HEAD
