@@ -41,7 +41,9 @@ class ExecutionToolWindowManager(
      */
     @RequiresEdt
     fun addTab(process: OSProcessHandler, console: ExecutionConsole, tabName: String): RunContentDescriptor {
-        val contentDescriptor = RunContentDescriptor(console, process, console.component, tabName)
+        val contentDescriptor = RunContentDescriptor(console, process, console.component, tabName).apply {
+            isActivateToolWindowWhenAdded = false
+        }
 
         runContentManager.value.showRunContent(
             executor.value,
