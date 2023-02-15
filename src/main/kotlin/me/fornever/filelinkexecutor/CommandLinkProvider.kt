@@ -9,9 +9,11 @@ import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.editor.colors.CodeInsightColors
 import com.intellij.openapi.editor.colors.EditorColorsManager
 import com.intellij.openapi.editor.markup.TextAttributes
+import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.project.DumbAware
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.SystemInfo
+import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.terminal.JBTerminalSystemSettingsProviderBase
 import com.intellij.util.io.URLUtil
 import java.io.File
@@ -30,12 +32,16 @@ class CommandLinkProvider : ConsoleFilterProvider {
 
     inner class CommandLinkFilter(
         private val editorColorsManager: Lazy<EditorColorsManager>,
-        private val commandExecutor: Lazy<CommandExecutor>
+        private val commandExecutor: Lazy<CommandExecutor>,
+        private val localFileSystem: Lazy<LocalFileSystem>,
+        private val fileEditorManager: Lazy<FileEditorManager>
     ) : Filter, DumbAware {
 
         constructor(project: Project) : this(
             lazy { EditorColorsManager.getInstance() },
-            lazy { CommandExecutor.getInstance(project) }
+            lazy { CommandExecutor.getInstance(project) },
+            lazy { LocalFileSystem.getInstance() },
+            lazy { FileEditorManager.getInstance(project) }
         )
 
         private val highlightAttributes: TextAttributes
@@ -46,9 +52,7 @@ class CommandLinkProvider : ConsoleFilterProvider {
                 return TextAttributes.merge(commandToRun, link)
             }
 
-        private fun isOpenable(file: File): Boolean {
-            if (file.isDirectory) return true
-
+        private fun isExecutable(file: File): Boolean {
             return if (SystemInfo.isWindows) {
                 val pathExtensions = PathEnvironmentVariableUtil.getWindowsExecutableFileExtensions()
                 val extensionWithDot = "." + file.extension.lowercase()
@@ -64,8 +68,21 @@ class CommandLinkProvider : ConsoleFilterProvider {
             logger.info("Link to a $kind \"$file\" was clicked")
             if (file.isDirectory)
                 RevealFileAction.openDirectory(file)
-            else
-                commandExecutor.value.runProgram(file)
+            else {
+                if (isExecutable(file)) {
+                    logger.info("""File "$file" is executable, starting a program.""")
+                    commandExecutor.value.runProgram(file)
+                } else {
+                    logger.info("""File "$file" is not executable, opening in editor.""")
+                    val virtualFile = localFileSystem.value.findFileByIoFile(file)
+                    if (virtualFile == null) {
+                        logger.warn("Virtual file is null for \"$file\".")
+                        return@HyperlinkInfo
+                    }
+
+                    fileEditorManager.value.openFile(virtualFile, true)
+                }
+            }
         }
 
         override fun applyFilter(line: String, entireLength: Int): Filter.Result? {
@@ -76,9 +93,7 @@ class CommandLinkProvider : ConsoleFilterProvider {
             val items = mutableListOf<Filter.ResultItem>()
             val textStartOffset = entireLength - line.length
             while (m.find()) {
-                val result = createResultItem(textStartOffset, m)
-                if (result != null)
-                    items.add(result)
+                items.add(createResultItem(textStartOffset, m))
             }
 
             return when {
@@ -87,10 +102,8 @@ class CommandLinkProvider : ConsoleFilterProvider {
             }
         }
 
-        private fun createResultItem(textStartOffset: Int, m: Matcher): Filter.ResultItem? {
+        private fun createResultItem(textStartOffset: Int, m: Matcher): Filter.ResultItem {
             val url = m.group()
-            val file = URLUtil.urlToFile(URL(url))
-            if (!isOpenable(file)) return null
             return Filter.ResultItem(
                 textStartOffset + m.start(),
                 textStartOffset + m.end(),
