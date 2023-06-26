@@ -64,25 +64,12 @@ jobs:
 
       - name: Create a release
         if: startsWith(github.ref, 'refs/tags/v')
-        id: release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: softprops/action-gh-release@v1
         with:
-          tag_name: ${{ github.ref }}
-          release_name: file-link-executor v${{ steps.version.outputs.version }}
+          name: file-link-executor v${{ steps.version.outputs.version }}
           body_path: ./changelog-section.md
-
-      - name: Upload the distribution
-        if: startsWith(github.ref, 'refs/tags/v')
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.release.outputs.upload_url }}
-          asset_name: file-link-executor-${{ steps.version.outputs.version }}.zip
-          asset_path: build/distributions/file-link-executor-${{ steps.version.outputs.version }}.zip
-          asset_content_type: application/zip
+          files: |
+            build/distributions/file-link-executor-${{ steps.version.outputs.version }}.zip
 
       - name: Publish
         if: startsWith(github.ref, 'refs/tags/v')
