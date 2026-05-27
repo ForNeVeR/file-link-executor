@@ -15,6 +15,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 
 ##############################################################################
 #
@@ -131,7 +133,7 @@ if [ "$darwin" = "true" ]; then
         JVM_URL=https://download.oracle.com/java/17/archive/jdk-17.0.3.1_macos-aarch64_bin.tar.gz
         JVM_TARGET_DIR=$BUILD_DIR/jdk-17.0.3.1_macos-aarch64_bin-297fa2
         ;;
-    *) 
+    *)
         die "Unknown architecture $JVM_ARCH"
         ;;
     esac
@@ -149,7 +151,7 @@ else
             JVM_URL=https://download.oracle.com/java/17/archive/jdk-17.0.3.1_linux-aarch64_bin.tar.gz
             JVM_TARGET_DIR=$BUILD_DIR/jdk-17.0.3.1_linux-aarch64_bin-319da6
             ;;
-        *) 
+        *)
             die "Unknown architecture $JVM_ARCH"
             ;;
         esac
@@ -184,7 +186,7 @@ else
     *".zip") unzip "$JVM_TEMP_FILE" -d "$JVM_TARGET_DIR" ;;
     *) tar -x -f "$JVM_TEMP_FILE" -C "$JVM_TARGET_DIR" ;;
   esac
-  
+
   rm -f "$JVM_TEMP_FILE"
 
   echo "$JVM_URL" >"$JVM_TARGET_DIR/.flag"
