@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2023 Friedrich von Never <friedrich@fornever.me>
+//
+// SPDX-License-Identifier: MIT
+
 namespace TestProject1;
 
 public class Tests

@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2022 Friedrich von Never <friedrich@fornever.me>
+#
+# SPDX-License-Identifier: MIT
+
 <#
     .SYNOPSIS
         The purpose of this script is to unpack the compressed plugin artifact.

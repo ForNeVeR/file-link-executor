@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2022-2023 Friedrich von Never <friedrich@fornever.me>
+
+SPDX-License-Identifier: MIT
+-->
+
 Changelog
 =========
 All notable changes to this project will be documented in this file.

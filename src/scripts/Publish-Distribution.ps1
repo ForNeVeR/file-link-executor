@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2022 Friedrich von Never <friedrich@fornever.me>
+#
+# SPDX-License-Identifier: MIT
+
 <#
     .SYNOPSIS
         This script publishes the plugin distribution from the $DistributionsLocation to the JetBrains Marketplace.

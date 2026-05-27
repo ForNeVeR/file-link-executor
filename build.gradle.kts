@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2019-2023 Friedrich von Never <friedrich@fornever.me>
+//
+// SPDX-License-Identifier: MIT
+
 plugins {
     id("me.filippov.gradle.jvm.wrapper") version "0.14.0"
     id("org.jetbrains.changelog") version "2.0.0"

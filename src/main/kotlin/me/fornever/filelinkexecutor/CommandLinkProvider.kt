@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2018-2022 Friedrich von Never <friedrich@fornever.me>
+//
+// SPDX-License-Identifier: MIT
+
 package me.fornever.filelinkexecutor
 
 import com.intellij.execution.configurations.PathEnvironmentVariableUtil
