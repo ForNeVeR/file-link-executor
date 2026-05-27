@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2018-2026 Friedrich von Never <friedrich@fornever.me>
+
+SPDX-License-Identifier: MIT
+-->
+
 File Link Executor [![JetBrains Plugins][badge-plugins]][plugin-repository]
 ==================
 
@@ -21,6 +27,12 @@ Documentation
 - [License (MIT)][docs.license]
 - [Maintainership][docs.maintainership]
 
+License
+-------
+The project is distributed under the terms of [the MIT license][docs.license] (unless a particular file states otherwise).
+
+The license indication in the project's sources is compliant with the [REUSE specification v3.3][reuse.spec].
+
 [badge-plugins]: https://img.shields.io/jetbrains/plugin/v/12787?label=file-link-executor
 [docs.changelog]: CHANGELOG.md
 [docs.contributing]: CONTRIBUTING.md
@@ -28,3 +40,4 @@ Documentation
 [docs.maintainership]: MAINTAINERSHIP.md
 [docs.screenshot]: docs/screenshot.png
 [plugin-repository]: https://plugins.jetbrains.com/plugin/12787-file-link-executor
+[reuse.spec]: https://reuse.software/spec-3.3/
