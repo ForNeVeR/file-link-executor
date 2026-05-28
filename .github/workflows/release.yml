@@ -34,22 +34,18 @@ jobs:
           input: ./CHANGELOG.md
           output: ./changelog-section.md
 
-      - name: Cache dependencies
-        uses: actions/cache@v3
+      - name: Cache downloaded JDK
+        uses: actions/cache@v5
         with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-            ${{ matrix.config.jvmCache }}
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-
+          key: ${{ runner.os }}.jvm.${{ hashFiles('gradlew*') }}
+          path: |-
+            ~/.local/share/gradle-jvm
 
-      - name: Build
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v6
+
+      - name: Build the plugin
         run: ./gradlew buildPlugin
-
-      - name: Stop Gradle daemon
-        run: ./gradlew --stop
 
       - name: Unpack distribution # for the purpose of uploading
         shell: pwsh
