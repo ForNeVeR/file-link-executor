@@ -32,28 +32,21 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Cache dependencies
-        uses: actions/cache@v3
+      - name: Cache downloaded JDK
+        uses: actions/cache@v5
         with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-            ${{ matrix.config.jvmCache }}
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-
+          key: ${{ runner.os }}.jvm.${{ hashFiles('gradlew*') }}
+          path: |-
+            ~/.local/share/gradle-jvm
+            ~/AppData/Local/gradle-jvm
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v6
 
-      - name: Build
+      - name: Build the plugin
         run: ./gradlew buildPlugin
 
-      - name: Stop Gradle daemon
-        run: ./gradlew --stop
-  validation:
-    runs-on: ubuntu-24.04
-    name: "Validate Gradle wrapper"
-    steps:
-      - uses: actions/checkout@v2
-      - uses: gradle/wrapper-validation-action@v1
+      - name: Check
+        run: ./gradlew check
 
   licenses:
     runs-on: ubuntu-24.04
