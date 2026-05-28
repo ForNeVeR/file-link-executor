@@ -16,17 +16,14 @@ on:
 
 jobs:
   main:
-    runs-on: ${{ matrix.config.image }}
-    name: ${{ matrix.config.image }}
+    runs-on: ${{ matrix.image }}
+    name: ${{ matrix.image }}
     strategy:
       matrix:
-        config:
-          - image: macos-14
-            jvmCache: '~/.local/share/gradle-jvm'
-          - image: ubuntu-24.04
-            jvmCache: '~/.local/share/gradle-jvm'
-          - image: windows-2025
-            jvmCache: '~/AppData/Local/gradle-jvm'
+        image:
+          - macos-14
+          - ubuntu-24.04
+          - windows-2025
       fail-fast: false
     steps:
       - name: Checkout
