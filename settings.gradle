@@ -1,5 +1,0 @@
-// SPDX-FileCopyrightText: 2019 Friedrich von Never <friedrich@fornever.me>
-//
-// SPDX-License-Identifier: MIT
-
-rootProject.name = 'file-link-executor'
