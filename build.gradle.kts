@@ -1,12 +1,15 @@
-// SPDX-FileCopyrightText: 2019-2023 Friedrich von Never <friedrich@fornever.me>
-//
-// SPDX-License-Identifier: MIT
+/*
+ * SPDX-FileCopyrightText: 2019-2023 Friedrich von Never <friedrich@fornever.me>
+ * SPDX-FileCopyrightText: 2026 file-link-executor contributors <https://github.com/ForNeVeR/file-link-executor>
+ *
+ * SPDX-License-Identifier: MIT
+ */
 
 plugins {
-    id("me.filippov.gradle.jvm.wrapper") version "0.14.0"
-    id("org.jetbrains.changelog") version "2.0.0"
-    id("org.jetbrains.intellij") version "1.13.0"
-    id("org.jetbrains.kotlin.jvm") version "1.7.20"
+    alias(libs.plugins.jvm.wrapper)
+    alias(libs.plugins.changelog)
+    alias(libs.plugins.intellij)
+    alias(libs.plugins.kotlin.jvm)
 }
 
 group = "me.fornever"
@@ -17,7 +20,7 @@ repositories {
 }
 
 intellij {
-    version.set("2022.2")
+    version.set(libs.versions.intellij.platform)
 }
 
 tasks {
