@@ -20,11 +20,11 @@ jobs:
     strategy:
       matrix:
         config:
-          - image: macos-latest
+          - image: macos-14
             jvmCache: '~/.local/share/gradle-jvm'
-          - image: ubuntu-latest
+          - image: ubuntu-24.04
             jvmCache: '~/.local/share/gradle-jvm'
-          - image: windows-latest
+          - image: windows-2025
             jvmCache: '~/AppData/Local/gradle-jvm'
       fail-fast: false
     steps:
@@ -48,7 +48,7 @@ jobs:
       - name: Stop Gradle daemon
         run: ./gradlew --stop
   validation:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     name: "Validate Gradle wrapper"
     steps:
       - uses: actions/checkout@v2
