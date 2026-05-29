@@ -1,6 +1,5 @@
 /*
- * SPDX-FileCopyrightText: 2019-2023 Friedrich von Never <friedrich@fornever.me>
- * SPDX-FileCopyrightText: 2026 file-link-executor contributors <https://github.com/ForNeVeR/file-link-executor>
+ * SPDX-FileCopyrightText: 2019-2026 file-link-executor contributors <https://github.com/ForNeVeR/file-link-executor>
  *
  * SPDX-License-Identifier: MIT
  */
@@ -8,7 +7,7 @@
 plugins {
     alias(libs.plugins.jvm.wrapper)
     alias(libs.plugins.changelog)
-    alias(libs.plugins.intellij)
+    alias(libs.plugins.intellij.platform)
     alias(libs.plugins.kotlin.jvm)
 }
 
@@ -17,15 +16,20 @@ version = "1.1.0"
 
 repositories {
     mavenCentral()
+    intellijPlatform {
+        defaultRepositories()
+    }
 }
 
-intellij {
-    version.set(libs.versions.intellij.platform)
+dependencies {
+    intellijPlatform {
+        intellijIdeaCommunity(libs.versions.intellij)
+    }
 }
 
 tasks {
     wrapper {
-        gradleVersion = "7.5.1"
+        gradleVersion = "9.0.0"
         distributionType = Wrapper.DistributionType.ALL
     }
 
@@ -42,7 +46,7 @@ tasks {
     }
 
     patchPluginXml {
-        sinceBuild.set("222.0")
+        sinceBuild.set("233.0")
         untilBuild.set(provider { null })
 
         changeNotes.set(provider {
