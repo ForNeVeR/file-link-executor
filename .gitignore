@@ -1,8 +1,11 @@
-# SPDX-FileCopyrightText: 2018-2019 Friedrich von Never <friedrich@fornever.me>
+# SPDX-FileCopyrightText: 2018-2026 Friedrich von Never <friedrich@fornever.me>
 #
 # SPDX-License-Identifier: MIT
 
+# Build system:
 /.gradle/
-/.idea/
-
+/.intellijPlatform/
 /build/
+
+# IDE:
+/.idea/
