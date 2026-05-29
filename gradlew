@@ -15,8 +15,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# SPDX-License-Identifier: Apache-2.0
-#
 
 ##############################################################################
 #
@@ -57,7 +55,7 @@
 #       Darwin, MinGW, and NonStop.
 #
 #   (3) This script is generated from the Groovy template
-#       https://github.com/gradle/gradle/blob/master/subprojects/plugins/src/main/resources/org/gradle/api/internal/plugins/unixStartScript.txt
+#       https://github.com/gradle/gradle/blob/HEAD/subprojects/plugins/src/main/resources/org/gradle/api/internal/plugins/unixStartScript.txt
 #       within the Gradle project.
 #
 #       You can find Gradle at https://github.com/gradle/gradle/.
@@ -82,10 +80,10 @@ do
     esac
 done
 
-APP_HOME=$( cd "${APP_HOME:-./}" && pwd -P ) || exit
-
-APP_NAME="Gradle"
+# This is normally unused
+# shellcheck disable=SC2034
 APP_BASE_NAME=${0##*/}
+APP_HOME=$( cd "${APP_HOME:-./}" && pwd -P ) || exit
 
 # Add default JVM options here. You can also use JAVA_OPTS and GRADLE_OPTS to pass JVM options to this script.
 DEFAULT_JVM_OPTS='"-Xmx64m" "-Xms64m"'
@@ -133,7 +131,7 @@ if [ "$darwin" = "true" ]; then
         JVM_URL=https://download.oracle.com/java/17/archive/jdk-17.0.3.1_macos-aarch64_bin.tar.gz
         JVM_TARGET_DIR=$BUILD_DIR/jdk-17.0.3.1_macos-aarch64_bin-297fa2
         ;;
-    *)
+    *) 
         die "Unknown architecture $JVM_ARCH"
         ;;
     esac
@@ -151,7 +149,7 @@ else
             JVM_URL=https://download.oracle.com/java/17/archive/jdk-17.0.3.1_linux-aarch64_bin.tar.gz
             JVM_TARGET_DIR=$BUILD_DIR/jdk-17.0.3.1_linux-aarch64_bin-319da6
             ;;
-        *)
+        *) 
             die "Unknown architecture $JVM_ARCH"
             ;;
         esac
@@ -186,7 +184,7 @@ else
     *".zip") unzip "$JVM_TEMP_FILE" -d "$JVM_TARGET_DIR" ;;
     *) tar -x -f "$JVM_TEMP_FILE" -C "$JVM_TARGET_DIR" ;;
   esac
-
+  
   rm -f "$JVM_TEMP_FILE"
 
   echo "$JVM_URL" >"$JVM_TARGET_DIR/.flag"
@@ -236,12 +234,16 @@ fi
 if ! "$cygwin" && ! "$darwin" && ! "$nonstop" ; then
     case $MAX_FD in #(
       max*)
+        # In POSIX sh, ulimit -H is undefined. That's why the result is checked to see if it worked.
+        # shellcheck disable=SC3045 
         MAX_FD=$( ulimit -H -n ) ||
             warn "Could not query maximum file descriptor limit"
     esac
     case $MAX_FD in  #(
       '' | soft) :;; #(
       *)
+        # In POSIX sh, ulimit -n is undefined. That's why the result is checked to see if it worked.
+        # shellcheck disable=SC3045 
         ulimit -n "$MAX_FD" ||
             warn "Could not set maximum file descriptor limit to $MAX_FD"
     esac
