@@ -1,0 +1,46 @@
+# SPDX-FileCopyrightText: 2026 file-link-executor contributors <https://github.com/ForNeVeR/file-link-executor>
+#
+# SPDX-License-Identifier: MIT
+
+name: Dependency Updater
+on:
+  push:
+    branches:
+    - main
+    - renovate/**
+  pull_request:
+    branches:
+    - main
+  schedule:
+  - cron: 0 0 * * 6
+  workflow_dispatch:
+jobs:
+  main:
+    permissions:
+      contents: write
+      pull-requests: write
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+    - name: Check out the sources
+      uses: actions/checkout@v6
+    - id: update
+      name: Update the dependency versions
+      uses: ForNeVeR/intellij-updater@v1
+    - if: steps.update.outputs.has-changes == 'true' && (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch')
+      id: generate-token
+      name: Generate a token to make a PR
+      uses: actions/create-github-app-token@v3
+      with:
+        app-id: ${{ secrets.IJ_UPDATER_APP_ID }}
+        private-key: ${{ secrets.IJ_UPDATER_PRIVATE_KEY }}
+    - if: steps.update.outputs.has-changes == 'true' && (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch')
+      name: Create a PR
+      uses: peter-evans/create-pull-request@v8
+      with:
+        author: intellij-updater <friedrich@fornever.me>
+        body-path: ${{ steps.update.outputs.pr-body-path }}
+        branch: ${{ steps.update.outputs.branch-name }}
+        commit-message: ${{ steps.update.outputs.commit-message }}
+        title: ${{ steps.update.outputs.pr-title }}
+        token: ${{ steps.generate-token.outputs.token }}

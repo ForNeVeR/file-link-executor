@@ -5,6 +5,15 @@
     ],
     "automerge": true,
     "automergeType": "branch",
+    "packageRules": [
+        {
+            "enabled": false,
+            "description": "Kotlin is managed by intellij-updater.",
+            "matchPackageNames": [
+                "/org.jetbrains.kotlin.jvm/"
+            ]
+        }
+    ],
     "customManagers": [
         {
             "description": "Update the GitHub Actions runners.",
