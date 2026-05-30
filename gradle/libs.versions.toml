@@ -6,7 +6,7 @@
 intellij = "2023.3"
 
 [plugins]
-kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version = "1.9.25" }
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version = "2.3.21" }
 intellij-platform = { id = "org.jetbrains.intellij.platform", version = "2.16.0" }
 changelog = { id = "org.jetbrains.changelog", version = "2.5.0" }
 jvm-wrapper = { id = "me.filippov.gradle.jvm.wrapper", version = "0.16.0" }
