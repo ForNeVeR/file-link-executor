@@ -17,7 +17,7 @@ plugins {
 }
 
 group = "me.fornever"
-version = "1.1.0"
+version = providers.gradleProperty("pluginVersion").get()
 
 repositories {
     mavenCentral()
@@ -64,6 +64,9 @@ intellijPlatform {
             VerifyPluginTask.FailureLevel.INTERNAL_API_USAGES,
             VerifyPluginTask.FailureLevel.OVERRIDE_ONLY_API_USAGES
         )
+    }
+    publishing {
+        token = providers.environmentVariable("JETBRAINS_MARKETPLACE_TOKEN")
     }
 }
 
