@@ -1,6 +1,6 @@
 The MIT License
 ===============
-Copyright (C) 2023 file-link-executor contributors
+Copyright (C) 2018-2026 file-link-executor contributors <https://github.com/ForNeVeR/file-link-executor>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in

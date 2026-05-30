@@ -10,9 +10,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [1.2.0] - 2026-05-31
 ### Changed
 - **(Requirement update!)** The plugin is now compatible with IntelliJ Platform 2023.3+.
+- Update the dependencies.
 
 ## [1.1.0] - 2023-02-16
 ### Added
@@ -84,4 +85,5 @@ The initial release of the IntelliJ Command Link plugin. It is only compatible w
 [1.0.1]: https://github.com/ForNeVeR/file-link-executor/compare/v1.0.0...v1.0.1
 [1.0.2]: https://github.com/ForNeVeR/file-link-executor/compare/v1.0.1...v1.0.2
 [1.1.0]: https://github.com/ForNeVeR/file-link-executor/compare/v1.0.2...v1.1.0
-[Unreleased]: https://github.com/ForNeVeR/file-link-executor/compare/v1.1.0...HEAD
+[1.2.0]: https://github.com/ForNeVeR/file-link-executor/compare/v1.1.0...v1.2.0
+[Unreleased]: https://github.com/ForNeVeR/file-link-executor/compare/v1.2.0...HEAD
