@@ -17,8 +17,6 @@ For directory links, it will open the directories in a local file manager.
 
 For non-executable files, they will open in editor. This differs from the standard IntelliJ file link processing in how it handles hashes in file URLs: for a link like `file:///file.txt#aaa`, IntelliJ will try opening a file `/file.txt#aaa`, while this plugin will ignore the part of the URL after the hash, and open `/file.txt`.
 
-Works for any IntelliJ-based IDEs, starting from IntelliJ platform 2022.2.
-
 Documentation
 -------------
 
