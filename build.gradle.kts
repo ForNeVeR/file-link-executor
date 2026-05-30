@@ -4,6 +4,11 @@
  * SPDX-License-Identifier: MIT
  */
 
+import org.jetbrains.changelog.Changelog
+import org.jetbrains.changelog.exceptions.MissingVersionException
+import org.jetbrains.intellij.platform.gradle.models.ProductRelease
+import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask
+
 plugins {
     alias(libs.plugins.jvm.wrapper)
     alias(libs.plugins.changelog)
@@ -27,6 +32,41 @@ dependencies {
     }
 }
 
+intellijPlatform {
+    pluginConfiguration {
+        val latestChangelog = try {
+            changelog.getUnreleased()
+        } catch (_: MissingVersionException) {
+            changelog.getLatest()
+        }
+        changeNotes = provider {
+            changelog.renderItem(
+                latestChangelog
+                    .withHeader(false)
+                    .withEmptySections(false),
+                Changelog.OutputType.HTML
+            )
+        }
+    }
+    pluginVerification {
+        ides {
+            select {
+                channels = listOf(
+                    ProductRelease.Channel.RELEASE,
+                    ProductRelease.Channel.EAP
+                )
+                untilBuild = providers.gradleProperty("untilBuildForVerification")
+            }
+        }
+        failureLevel.addAll(
+            VerifyPluginTask.FailureLevel.COMPATIBILITY_WARNINGS,
+            VerifyPluginTask.FailureLevel.DEPRECATED_API_USAGES,
+            VerifyPluginTask.FailureLevel.INTERNAL_API_USAGES,
+            VerifyPluginTask.FailureLevel.OVERRIDE_ONLY_API_USAGES
+        )
+    }
+}
+
 tasks {
     wrapper {
         gradleVersion = "9.5.1"
@@ -45,18 +85,7 @@ tasks {
         enabled = false
     }
 
-    patchPluginXml {
-        sinceBuild.set("233.0")
-        untilBuild.set(provider { null })
-
-        changeNotes.set(provider {
-            changelog.renderItem(
-                changelog
-                    .getLatest()
-                    .withHeader(false)
-                    .withEmptySections(false),
-                org.jetbrains.changelog.Changelog.OutputType.HTML
-            )
-        })
+    check {
+        dependsOn(verifyPlugin)
     }
 }
