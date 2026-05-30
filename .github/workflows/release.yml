@@ -65,7 +65,7 @@ jobs:
 
       - name: Create a release
         if: startsWith(github.ref, 'refs/tags/v')
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v3
         with:
           name: file-link-executor v${{ steps.version.outputs.version }}
           body_path: ./changelog-section.md
