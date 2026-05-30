@@ -1,15 +1,17 @@
-// SPDX-FileCopyrightText: 2018-2022 Friedrich von Never <friedrich@fornever.me>
-//
-// SPDX-License-Identifier: MIT
+/*
+ * SPDX-FileCopyrightText: 2018-2026 file-link-executor contributors <https://github.com/ForNeVeR/file-link-executor>
+ *
+ * SPDX-License-Identifier: MIT
+ */
 
 package me.fornever.filelinkexecutor
 
 import com.intellij.execution.configurations.GeneralCommandLine
 import com.intellij.execution.filters.TextConsoleBuilderFactory
-import com.intellij.execution.process.ProcessAdapter
 import com.intellij.execution.process.ProcessEvent
 import com.intellij.execution.process.ProcessHandler
 import com.intellij.execution.process.ProcessHandlerFactory
+import com.intellij.execution.process.ProcessListener
 import com.intellij.execution.ui.ConsoleView
 import com.intellij.execution.ui.ConsoleViewContentType
 import com.intellij.execution.ui.RunContentDescriptor
@@ -17,9 +19,9 @@ import com.intellij.openapi.Disposable
 import com.intellij.openapi.application.EDT
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
-import com.intellij.openapi.progress.withBackgroundProgressIndicator
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.MessageType
+import com.intellij.platform.ide.progress.withBackgroundProgress
 import com.intellij.util.PathUtil
 import com.intellij.util.application
 import kotlinx.coroutines.*
@@ -80,7 +82,7 @@ class CommandExecutor(
     private fun startProgressIndicator(listener: ExecutionListener, programName: String) {
         scope.launch {
             @Suppress("UnstableApiUsage")
-            withBackgroundProgressIndicator(
+            withBackgroundProgress(
                 project,
                 FileLinkExecutorBundle.message("execution.running", programName)
             ) {
@@ -95,7 +97,7 @@ private class ExecutionListener(
     private val programName: String,
     private val console: ConsoleView,
     private val descriptor: RunContentDescriptor
-) : ProcessAdapter() {
+) : ProcessListener {
 
     private val _termination = CompletableDeferred<Unit>()
     val termination: Deferred<Unit>
