@@ -72,7 +72,7 @@ intellijPlatform {
 
 tasks {
     wrapper {
-        gradleVersion = "9.8.2"
+        gradleVersion = "9.9.1"
         distributionType = Wrapper.DistributionType.ALL
     }
 
