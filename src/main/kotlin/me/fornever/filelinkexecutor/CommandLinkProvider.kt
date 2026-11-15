@@ -1,6 +1,9 @@
-// SPDX-FileCopyrightText: 2018-2022 Friedrich von Never <friedrich@fornever.me>
-//
-// SPDX-License-Identifier: MIT
+/*
+ * SPDX-FileCopyrightText: 2018-2022 Friedrich von Never <friedrich@fornever.me>
+ * SPDX-FileCopyrightText: 2026 file-link-executor contributors <https://github.com/ForNeVeR/file-link-executor>
+ *
+ * SPDX-License-Identifier: MIT
+ */
 
 package me.fornever.filelinkexecutor
 
@@ -13,7 +16,7 @@ import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.editor.colors.CodeInsightColors
 import com.intellij.openapi.editor.colors.EditorColorsManager
 import com.intellij.openapi.editor.markup.TextAttributes
-import com.intellij.openapi.fileEditor.FileEditorManager
+import com.intellij.openapi.fileEditor.OpenFileDescriptor
 import com.intellij.openapi.project.DumbAware
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.SystemInfo
@@ -21,7 +24,7 @@ import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.terminal.JBTerminalSystemSettingsProviderBase
 import com.intellij.util.io.URLUtil
 import java.io.File
-import java.net.URL
+import java.net.URI
 import java.util.regex.Matcher
 
 class CommandLinkProvider : ConsoleFilterProvider {
@@ -34,18 +37,18 @@ class CommandLinkProvider : ConsoleFilterProvider {
         return arrayOf(CommandLinkFilter(project))
     }
 
-    inner class CommandLinkFilter(
+    class CommandLinkFilter(
+        private val project: Project,
         private val editorColorsManager: Lazy<EditorColorsManager>,
         private val commandExecutor: Lazy<CommandExecutor>,
-        private val localFileSystem: Lazy<LocalFileSystem>,
-        private val fileEditorManager: Lazy<FileEditorManager>
+        private val localFileSystem: Lazy<LocalFileSystem>
     ) : Filter, DumbAware {
 
         constructor(project: Project) : this(
+            project,
             lazy { EditorColorsManager.getInstance() },
             lazy { CommandExecutor.getInstance(project) },
-            lazy { LocalFileSystem.getInstance() },
-            lazy { FileEditorManager.getInstance(project) }
+            lazy { LocalFileSystem.getInstance() }
         )
 
         private val highlightAttributes: TextAttributes
@@ -67,11 +70,11 @@ class CommandLinkProvider : ConsoleFilterProvider {
         }
 
         private fun buildHyperlinkInfo(url: String) = HyperlinkInfo {
-            val file = URLUtil.urlToFile(URL(url))
+            val file = File(URI(url).schemeSpecificPart)
             val kind = if (file.isDirectory) "directory" else "file"
             logger.info("Link to a $kind \"$file\" was clicked")
             if (file.isDirectory)
-                RevealFileAction.openDirectory(file)
+                RevealFileAction.openDirectory(file.toPath())
             else {
                 if (isExecutable(file)) {
                     logger.info("""File "$file" is executable, starting a program.""")
@@ -84,7 +87,7 @@ class CommandLinkProvider : ConsoleFilterProvider {
                         return@HyperlinkInfo
                     }
 
-                    fileEditorManager.value.openFile(virtualFile, true)
+                    OpenFileDescriptor(project, virtualFile).navigate(true)
                 }
             }
         }

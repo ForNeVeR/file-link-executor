@@ -28,8 +28,12 @@ repositories {
 
 dependencies {
     intellijPlatform {
-        intellijIdeaCommunity(libs.versions.intellij)
+        intellijIdea(libs.versions.intellij)
     }
+}
+
+kotlin {
+    jvmToolchain(25)
 }
 
 intellijPlatform {
@@ -74,14 +78,6 @@ tasks {
     wrapper {
         gradleVersion = "9.9.1"
         distributionType = Wrapper.DistributionType.ALL
-    }
-
-    withType<JavaCompile> {
-        java.targetCompatibility = JavaVersion.VERSION_17
-    }
-
-    withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-        kotlinOptions.jvmTarget = "17"
     }
 
     buildSearchableOptions {
