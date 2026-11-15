@@ -22,10 +22,11 @@ import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.MessageType
 import com.intellij.platform.ide.progress.withBackgroundProgress
-import com.intellij.util.PathUtil
 import com.intellij.util.application
 import kotlinx.coroutines.*
-import java.io.File
+import java.nio.file.Path
+import kotlin.io.path.invariantSeparatorsPathString
+import kotlin.io.path.name
 
 @Service(Service.Level.PROJECT)
 class CommandExecutor(
@@ -52,8 +53,8 @@ class CommandExecutor(
         scope.cancel()
     }
 
-    fun runProgram(program: File) {
-        val cmd = GeneralCommandLine(PathUtil.toSystemIndependentName(program.absolutePath))
+    fun runProgram(program: Path) {
+        val cmd = GeneralCommandLine(program.invariantSeparatorsPathString)
         val programName = program.name
 
         val console = textConsoleBuilderFactory.value.createBuilder(project).console
@@ -81,7 +82,6 @@ class CommandExecutor(
 
     private fun startProgressIndicator(listener: ExecutionListener, programName: String) {
         scope.launch {
-            @Suppress("UnstableApiUsage")
             withBackgroundProgress(
                 project,
                 FileLinkExecutorBundle.message("execution.running", programName)

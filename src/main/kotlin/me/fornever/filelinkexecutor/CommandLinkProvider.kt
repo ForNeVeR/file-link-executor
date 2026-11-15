@@ -20,12 +20,17 @@ import com.intellij.openapi.fileEditor.OpenFileDescriptor
 import com.intellij.openapi.project.DumbAware
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.SystemInfo
-import com.intellij.openapi.vfs.LocalFileSystem
+import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.terminal.JBTerminalSystemSettingsProviderBase
 import com.intellij.util.io.URLUtil
-import java.io.File
 import java.net.URI
+import java.net.URISyntaxException
+import java.nio.file.FileSystemNotFoundException
+import java.nio.file.Path
 import java.util.regex.Matcher
+import kotlin.io.path.extension
+import kotlin.io.path.isDirectory
+import kotlin.io.path.isExecutable
 
 class CommandLinkProvider : ConsoleFilterProvider {
 
@@ -41,14 +46,14 @@ class CommandLinkProvider : ConsoleFilterProvider {
         private val project: Project,
         private val editorColorsManager: Lazy<EditorColorsManager>,
         private val commandExecutor: Lazy<CommandExecutor>,
-        private val localFileSystem: Lazy<LocalFileSystem>
+        private val virtualFileManager: Lazy<VirtualFileManager>
     ) : Filter, DumbAware {
 
         constructor(project: Project) : this(
             project,
             lazy { EditorColorsManager.getInstance() },
             lazy { CommandExecutor.getInstance(project) },
-            lazy { LocalFileSystem.getInstance() }
+            lazy { VirtualFileManager.getInstance() }
         )
 
         private val highlightAttributes: TextAttributes
@@ -59,31 +64,46 @@ class CommandLinkProvider : ConsoleFilterProvider {
                 return TextAttributes.merge(commandToRun, link)
             }
 
-        private fun isExecutable(file: File): Boolean {
+        private fun isExecutable(path: Path): Boolean {
             return if (SystemInfo.isWindows) {
                 val pathExtensions = PathEnvironmentVariableUtil.getWindowsExecutableFileExtensions()
-                val extensionWithDot = "." + file.extension.lowercase()
+                val extensionWithDot = "." + path.extension.lowercase()
                 pathExtensions.contains(extensionWithDot)
             } else {
-                file.canExecute()
+                path.isExecutable()
             }
         }
 
+        private fun parsePath(url: String): Path? =
+            try {
+                Path.of(URI(url))
+            } catch (e: URISyntaxException) {
+                logger.warn("Cannot parse link \"$url\".", e)
+                null
+            } catch (e: IllegalArgumentException) {
+                logger.warn("Cannot convert link \"$url\" to a local path.", e)
+                null
+            } catch (e: FileSystemNotFoundException) {
+                logger.warn("Cannot convert link \"$url\" to a local path.", e)
+                null
+            }
+
         private fun buildHyperlinkInfo(url: String) = HyperlinkInfo {
-            val file = File(URI(url).schemeSpecificPart)
-            val kind = if (file.isDirectory) "directory" else "file"
-            logger.info("Link to a $kind \"$file\" was clicked")
-            if (file.isDirectory)
-                RevealFileAction.openDirectory(file.toPath())
+            val path = parsePath(url) ?: return@HyperlinkInfo
+            val isDirectory = path.isDirectory()
+            val kind = if (isDirectory) "directory" else "file"
+            logger.info("Link to a $kind \"$path\" was clicked")
+            if (isDirectory)
+                RevealFileAction.openDirectory(path)
             else {
-                if (isExecutable(file)) {
-                    logger.info("""File "$file" is executable, starting a program.""")
-                    commandExecutor.value.runProgram(file)
+                if (isExecutable(path)) {
+                    logger.info("""File "$path" is executable, starting a program.""")
+                    commandExecutor.value.runProgram(path)
                 } else {
-                    logger.info("""File "$file" is not executable, opening in editor.""")
-                    val virtualFile = localFileSystem.value.findFileByIoFile(file)
+                    logger.info("""File "$path" is not executable, opening in editor.""")
+                    val virtualFile = virtualFileManager.value.findFileByNioPath(path)
                     if (virtualFile == null) {
-                        logger.warn("Virtual file is null for \"$file\".")
+                        logger.warn("Virtual file is null for \"$path\".")
                         return@HyperlinkInfo
                     }
 
