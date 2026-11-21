@@ -4,7 +4,7 @@
 
 [versions]
 intellij = "2026.3"
-kotlin = "2.4.10-RC2"
+kotlin = "2.4.21-RC"
 
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
